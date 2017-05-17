@@ -29,7 +29,7 @@ ENV ZEPPELIN_PORT 8080
 ENV ZEPPELIN_HOME /usr/zeppelin
 ENV ZEPPELIN_CONF_DIR $ZEPPELIN_HOME/conf
 ENV ZEPPELIN_NOTEBOOK_DIR $ZEPPELIN_HOME/notebook
-ENV ZEPPELIN_COMMIT v0.7.0
+ENV ZEPPELIN_COMMIT fcd3aa75cd411aceb235bea23f8d2968976db6a7
 RUN echo '{ "allow_root": true }' > /root/.bowerrc
 RUN set -ex \
  && buildDeps=' \
@@ -43,20 +43,30 @@ RUN set -ex \
    | tar x -C /tmp/ \
  && git clone https://github.com/apache/zeppelin.git /usr/src/zeppelin \
  && cd /usr/src/zeppelin \
- && git checkout -q $ZEPPELIN_COMMIT \
+ && git checkout -q $ZEPPELIN_COMMIT 
+
+RUN set -ex \  
+ && cd /usr/src/zeppelin \
  && dev/change_scala_version.sh "2.11" \
- && MAVEN_OPTS="-Xmx2g -XX:MaxPermSize=1024m" /tmp/apache-maven-3.3.9/bin/mvn --batch-mode package -DskipTests -Pscala-2.11 -Pbuild-distr \
-  -pl 'zeppelin-interpreter,zeppelin-zengine,zeppelin-display,spark-dependencies,spark,markdown,angular,shell,hbase,postgresql,jdbc,python,elasticsearch,zeppelin-web,zeppelin-server,zeppelin-distribution' \
+ && MAVEN_OPTS="-Xmx2g -XX:MaxPermSize=1024m" /tmp/apache-maven-3.3.9/bin/mvn --batch-mode package -DskipTests -Pscala-2.11 -Pbuild-distr -Pexamples \
+  -pl 'zeppelin-interpreter,zeppelin-zengine,zeppelin-display,spark-dependencies,spark,markdown,angular,shell,jdbc,python,zeppelin-web,zeppelin-server,zeppelin-distribution' \
  && tar xvf /usr/src/zeppelin/zeppelin-distribution/target/zeppelin*.tar.gz -C /usr/ \
  && mv /usr/zeppelin* $ZEPPELIN_HOME \
  && mkdir -p $ZEPPELIN_HOME/logs \
- && mkdir -p $ZEPPELIN_HOME/run \
- && apt-get purge -y --auto-remove $buildDeps \
- && rm -rf /var/lib/apt/lists/* \
- && rm -rf /usr/src/zeppelin \
- && rm -rf /root/.m2 \
- && rm -rf /root/.npm \
- && rm -rf /tmp/*
+ && mkdir -p $ZEPPELIN_HOME/run 
+
+RUN set -ex \
+ && git clone https://github.com/volumeint/helium-volume-leaflet.git /usr/zeppelin/helium-volume-leaflet \
+ && cd /usr/src/helium-volume-leaflet \
+ && npm run helium.dev \
+ && ls -la 
+
+#RUN apt-get purge -y --auto-remove $buildDeps \
+# && rm -rf /var/lib/apt/lists/* \
+# && rm -rf /usr/src/zeppelin \
+# && rm -rf /root/.m2 \
+# && rm -rf /root/.npm \
+# && rm -rf /tmp/*
 
 ADD about.json $ZEPPELIN_NOTEBOOK_DIR/2BTRWA9EV/note.json
 WORKDIR $ZEPPELIN_HOME
