@@ -18,6 +18,7 @@ RUN set -ex \
     numpy \
     pandasql \
     scipy \
+    matplotlib \
  ' \
  && pip3 install $packages \
  && rm -rf /root/.cache/pip \
@@ -46,8 +47,8 @@ RUN set -ex \
  && cd /usr/src/zeppelin \
  && git checkout -q $ZEPPELIN_COMMIT \
  && dev/change_scala_version.sh "2.11" \
- && MAVEN_OPTS="-Xmx2g -XX:MaxPermSize=1024m" /tmp/apache-maven-3.5.0/bin/mvn --batch-mode package -DskipTests -Pscala-2.11 -Pbuild-distr \
-  -pl 'zeppelin-interpreter,zeppelin-zengine,zeppelin-display,spark-dependencies,spark,markdown,angular,shell,hbase,postgresql,jdbc,python,elasticsearch,zeppelin-web,zeppelin-server,zeppelin-distribution' \
+ && MAVEN_OPTS="-Xmx2g -XX:MaxPermSize=1024m" /tmp/apache-maven-3.5.0/bin/mvn --batch-mode package -T 4 -DskipTests -Pscala-2.11 -Pbuild-distr -Pexamples \
+  -pl 'zeppelin-interpreter,zeppelin-zengine,zeppelin-display,spark-dependencies,spark,markdown,angular,shell,python,zeppelin-web,zeppelin-server,zeppelin-distribution' \
  && tar xvf /usr/src/zeppelin/zeppelin-distribution/target/zeppelin*.tar.gz -C /usr/ \
  && mv /usr/zeppelin* $ZEPPELIN_HOME \
  && mkdir -p $ZEPPELIN_HOME/logs \
@@ -62,6 +63,8 @@ RUN set -ex \
 
 RUN ln -s /usr/bin/pip3 /usr/bin/pip \
  && ln -s /usr/bin/python3 /usr/bin/python
+
+ADD matplotlibrc /root/.config/matplotlib/matplotlibrc
 
 ADD about.json $ZEPPELIN_NOTEBOOK_DIR/2BTRWA9EV/note.json
 WORKDIR $ZEPPELIN_HOME
