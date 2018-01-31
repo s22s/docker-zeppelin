@@ -49,7 +49,7 @@ RUN set -ex \
  RUN cd /usr/src/zeppelin \
  && git checkout -q $ZEPPELIN_COMMIT \
  && dev/change_scala_version.sh "2.11" \
- && MAVEN_OPTS="-Xmx2g -XX:MaxPermSize=1024m" /tmp/apache-maven-3.5.0/bin/mvn --batch-mode package -T 4 -DskipTests -Pscala-2.11 -Pbuild-distr -Pexamples \
+ && MAVEN_OPTS="-Xmx2g -XX:MaxPermSize=1024m" /tmp/apache-maven-3.5.0/bin/mvn --batch-mode package -T 4 -DskipTests -Pscala-2.11 -Pbuild-distr \
   -pl 'zeppelin-interpreter,zeppelin-zengine,zeppelin-display,spark-dependencies,spark,markdown,angular,shell,python,zeppelin-web,zeppelin-server,zeppelin-distribution' \
  && tar xvf /usr/src/zeppelin/zeppelin-distribution/target/zeppelin*.tar.gz -C /usr/ \
  && mv /usr/zeppelin* $ZEPPELIN_HOME \
